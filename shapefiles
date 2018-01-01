@@ -1,0 +1,37 @@
+# Credit to Robin Lovelace for his wonderful guide to creating maps using shapefiiles in R
+# His github can be found at github.com/Robinlovelace/Creating-maps-in-R for latest version
+
+# Add relevant libraries
+library(rgdal)
+library(dplyr)
+library(tmap)
+
+# Using readOGR, invoke the shapefile folder and call it ldn
+# This creates a Large Spatial Polygons Data Frame
+# When you download the shapefile folder, you'll see that it contains several files 
+# sharing the same name but ending in suffixes such as .shp, .prj, .sbn, .sbx etc...
+# Make sure you specify the file name with "layer = "
+
+ldn <- readOGR(dsn = "C:\\...", layer = "London_Borough_Excluding_MHW")
+
+# Make a quick plot of the boundary lines to check that it works
+plot(ldn)
+
+# Add your own data
+data<- read.csv("C:\\...")
+
+# Merge your data with the shapefiles using "left_join" from the dply library
+# left_join will add your data to the left of the ldn variable
+# You must have a column in your data with the boundary names matching 'NAME' in the shapefile 
+# in this example, 'NAME' = 'borough'
+
+ldn@data <- left_join(ldn@data, data, by = c('NAME' = 'borough'))
+
+# Make a quick choropleth map with the qtm function from tmap, referencing a column (c) in your data
+# in this example, tot_off represents the total number of criminal offences in FY2015
+# fill.palette allows you to select your colour scheme
+
+qtm(ldn, fill = c("tot_off"), fill.palette = "-Oranges")
+
+# You can add more than one column at a time in order to make multiple choropleth maps quickly
+qtm(ldn, fill = c("tot_off", "tot_violence", "tot_burglary", "tot_robbery"), fill.palette = "-Oranges")
